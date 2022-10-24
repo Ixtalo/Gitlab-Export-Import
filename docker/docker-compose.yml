@@ -1,0 +1,76 @@
+version: "3.6"
+services:
+  gitlab:
+    #image: gitlab/gitlab-ce:latest
+    image: gitlab/gitlab-ee:15.4.2-ee.0
+    hostname: ubuntuvm.vbox
+    environment:
+      GITLAB_ROOT_PASSWORD: adminadmin
+      # https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/README.md
+      GITLAB_OMNIBUS_CONFIG: |
+        #nginx["ssl_certificate"] = "/etc/gitlab/ssl/ubuntuvm.vbox.crt"
+        #nginx["ssl_certificate_key"] = "/etc/gitlab/ssl/ubuntuvm.vbox.key"
+        # https://docs.gitlab.com/omnibus/settings/configuration.html#configuring-the-external-url-for-gitlab
+        external_url "https://ubuntuvm.vbox:9443"
+        gitlab_rails['gitlab_url'] = "https://ubuntuvm.vbox:9443"
+        gitlab_rails['gitlab_port'] = 443
+        nginx['listen_port'] = 443
+        gitlab_kas['gitlab_address'] = "https://ubuntuvm.vbox:9443"
+        ##################external_url "http://ubuntuvm.vbox:9080"
+        # https://docs.gitlab.com/omnibus/settings/ssl.html#configure-https-manually
+        letsencrypt["enable"] = false
+        # https://docs.gitlab.com/omnibus/settings/memory_constrained_envs.html
+        puma["worker_processes"] = 0
+        sidekiq["max_concurrency"] = 10
+        prometheus_monitoring["enable"] = false
+        # https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/master/doc/settings/logs.md
+        gitaly['logging_format'] = ''
+        gitlab_shell['log_format'] = 'text'
+        gitlab_workhorse['log_format'] = 'text'
+        registry['log_formatter'] = 'text'
+        sidekiq['log_format'] = 'default'
+        gitlab_pages['log_format'] = 'text'
+        gitlab_rails['log_directory'] = "/ramdisk/gitlab/var/log/gitlab/gitlab-rails"
+        registry['log_directory'] = "/ramdisk/gitlab/var/log/gitlab/registry"
+        #gitlab_workhorse['log_directory'] = "/ramdisk/gitlab/var/log/gitlab/gitlab-workhorse"
+        puma['log_directory'] = "/ramdisk/gitlab/var/log/gitlab/puma"
+        sidekiq['log_directory'] = "/ramdisk/gitlab/var/log/gitlab/sidekiq"
+        gitlab_shell['log_directory'] = "/ramdisk/gitlab/var/log/gitlab/gitlab-shell/"
+        postgresql['log_directory'] = "/ramdisk/gitlab/var/log/gitlab/postgresql"
+        redis['log_directory'] = "/ramdisk/gitlab/var/log/gitlab/redis"
+        nginx['log_directory'] = "/ramdisk/gitlab/var/log/gitlab/nginx"
+        logrotate['log_directory'] = "/ramdisk/gitlab/var/log/gitlab/logrotate"
+        gitlab_pages['log_directory'] = "/ramdisk/gitlab/var/log/gitlab/gitlab-pages"
+        gitlab_kas['log_directory'] = '/ramdisk/gitlab/var/log/gitlab/gitlab-kas'
+        prometheus['log_directory'] = '/ramdisk/gitlab/var/log/gitlab/prometheus'
+        alertmanager['log_directory'] = '/ramdisk/gitlab/var/log/gitlab/alertmanager'
+        node_exporter['log_directory'] = '/ramdisk/gitlab/var/log/gitlab/node-exporter'
+        redis_exporter['log_directory'] = '/ramdisk/gitlab/var/log/gitlab/redis-exporter'
+        postgres_exporter['log_directory'] = '/ramdisk/gitlab/var/log/gitlab/postgres-exporter'
+        pgbouncer_exporter['log_directory'] = "/ramdisk/gitlab/var/log/gitlab/pgbouncer-exporter"
+        #gitlab_exporter['log_directory'] = "/ramdisk/gitlab/var/log/gitlab/gitlab-exporter"
+        grafana['log_directory'] = '/ramdisk/gitlab/var/log/gitlab/grafana'
+        #gitaly['log_directory'] = "/ramdisk/gitlab/var/log/gitlab/gitaly"
+        praefect['log_directory'] = "/ramdisk/gitlab/var/log/gitlab/praefect"
+        storage_check['log_directory'] = '/ramdisk/gitlab/var/log/gitlab/storage-check'
+        letsencrypt['auto_renew_log_directory'] = '/ramdisk/gitlab/var/log/gitlab/lets-encrypt'
+        geo_postgresql['log_directory'] = '/ramdisk/gitlab/var/log/gitlab/geo-postgresql'
+        geo_logcursor['log_directory'] = '/ramdisk/gitlab/var/log/gitlab/geo-logcursor'
+        pgbouncer['log_directory'] = '/ramdisk/gitlab/var/log/gitlab/pgbouncer'
+        patroni['log_directory'] = '/ramdisk/gitlab/var/log/gitlab/patroni'
+        consul['log_directory'] = '/ramdisk/gitlab/var/log/gitlab/consul'
+        spamcheck['log_directory'] = "/ramdisk/gitlab/var/log/gitlab/spamcheck"
+        spamcheck['classifier']['log_directory'] = "/ramdisk/gitlab/var/log/gitlab/spam-classifier"
+    ports:
+      #- "9080:80"
+      - "9443:443"
+      - "9022:22"
+    volumes:
+      - ./data/config:/etc/gitlab
+      - ./data/logs:/var/log/gitlab
+      - ./data/data:/var/opt/gitlab
+      #- /media/ramdisk/gitlab/data/config:/etc/gitlab
+      #- /media/ramdisk/gitlab/data/logs:/var/log/gitlab
+      #- /media/ramdisk/gitlab/data/data:/var/opt/gitlab
+      - /media/ramdisk:/ramdisk
+    shm_size: "256m"
